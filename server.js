@@ -60,6 +60,7 @@ app.get("/offline-image-from-video/:videoId", async (req, res) => {
             }
         );
 
+
         const videoData = await videoRes.json();
         console.log("VIDEO DATA:");
         console.dir(videoData, { depth: null });
@@ -76,13 +77,24 @@ app.get("/offline-image-from-video/:videoId", async (req, res) => {
                 }
             }
         );
-
+        const videosRecent = await fetch(
+            `https://api.twitch.tv/helix/videos?user_id=${videoData.data[0].user_id}&first=20`,
+            {
+                headers: {
+                    "Client-ID": CLIENT_ID,
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+        const videosRecentData = await videosRecent.json();
+        console.log("RECENT VIDEOS:");
+        console.dir(videosRecentData, { depth: null });
         const channelDataFullJson = await channelDataFull.json();
         console.log("FULL CHANNEL DATA:");
         console.dir(channelDataFullJson, { depth: null });
         const offlineImage = channelDataFullJson.data?.[0]?.offline_image_url;
 
-        res.json({ url: offlineImage });
+        res.json({ url: offlineImage, latestStreams: videosRecentData.data});
     } catch (err) {
         console.error("❌ ERROR:", err);
         res.status(500).json({ error: "Internal error" });
