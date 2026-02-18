@@ -43,6 +43,52 @@ app.get("/test", (req, res) => {
     res.send("Backend OK");
 });
 
+// obtener offline image desde video
+
+app.get("/offline-image-from-video/:videoId", async (req, res) => {
+    const videoId = req.params.videoId;
+    console.log(`🔍 Fetching offline image for video ID: ${videoId}`);
+    try {
+        const token = await getToken();
+        const videoRes = await fetch(
+            `https://api.twitch.tv/helix/videos?id=${videoId}`,
+            {
+                headers: {
+                    "Client-ID": CLIENT_ID,
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const videoData = await videoRes.json();
+        console.log("VIDEO DATA:");
+        console.dir(videoData, { depth: null });
+        const userLogin = videoData.data?.[0]?.user_login;
+        if (!userLogin) {
+            return res.json({ url: null, error: "Video or user not found" });
+        }
+        const channelDataFull = await fetch(
+            `https://api.twitch.tv/helix/users?login=${userLogin}`,
+            {
+                headers: {
+                    "Client-ID": CLIENT_ID,
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const channelDataFullJson = await channelDataFull.json();
+        console.log("FULL CHANNEL DATA:");
+        console.dir(channelDataFullJson, { depth: null });
+        const offlineImage = channelDataFullJson.data?.[0]?.offline_image_url;
+
+        res.json({ url: offlineImage });
+    } catch (err) {
+        console.error("❌ ERROR:", err);
+        res.status(500).json({ error: "Internal error" });
+    }
+});
+
 // 🎯 Obtener offline image
 app.get("/offline-image/:login", async (req, res) => {
     const login = req.params.login;
