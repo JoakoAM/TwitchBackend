@@ -157,12 +157,23 @@ app.get("/offline-image/:login", async (req, res) => {
         console.log("FULL CHANNEL DATA:");
         console.dir(channelDataFullJson, { depth: null });
         const offlineImage = channelDataFullJson.data?.[0]?.offline_image_url;
-
+        const videosRecent = await fetch(
+            `https://api.twitch.tv/helix/videos?user_id=${channelDataFullJson.data[0].id}&first=20`,
+            {
+                headers: {
+                    "Client-ID": CLIENT_ID,
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+        const videosRecentData = await videosRecent.json();
+        console.log("RECENT VIDEOS:");
+        console.dir(videosRecentData, { depth: null });
         res.json({ url: offlineImage, latestStreams: videosRecentData.data });
 
     } catch (err) {
         console.error("❌ ERROR:", err);
-        res.status(500).json({ error: "Internal error" });
+        res.status(500).json({ error: err.message });
     }
 });
 const PORT = process.env.PORT || 3001;
