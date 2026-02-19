@@ -94,14 +94,14 @@ app.get("/offline-image-from-video/:videoId", async (req, res) => {
         console.dir(channelDataFullJson, { depth: null });
         const offlineImage = channelDataFullJson.data?.[0]?.offline_image_url;
 
-        res.json({ url: offlineImage, latestStreams: videosRecentData.data});
+        res.json({ url: offlineImage, latestStreams: videosRecentData.data });
     } catch (err) {
         console.error("❌ ERROR:", err);
         res.status(500).json({ error: "Internal error" });
     }
 });
 
-// 🎯 Obtener offline image
+
 app.get("/offline-image/:login", async (req, res) => {
     const login = req.params.login;
     console.log(`🔍 Fetching offline image for: ${login}`);
@@ -127,7 +127,7 @@ app.get("/offline-image/:login", async (req, res) => {
 
         const id = userData.data[0].id;
 
-        // 2️⃣ Obtener canal
+
         const channelRes = await fetch(
             `https://api.twitch.tv/helix/channels?broadcaster_id=${id}`,
             {
@@ -158,7 +158,7 @@ app.get("/offline-image/:login", async (req, res) => {
         console.dir(channelDataFullJson, { depth: null });
         const offlineImage = channelDataFullJson.data?.[0]?.offline_image_url;
 
-        res.json({ url: offlineImage });
+        res.json({ url: offlineImage, latestStreams: videosRecentData.data });
 
     } catch (err) {
         console.error("❌ ERROR:", err);
